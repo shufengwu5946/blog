@@ -54,6 +54,16 @@ Hexo 是一个快速、简洁且高效的博客框架。Hexo 使用 Markdown（�
 ![开启服务器](Hexo-Github-io-blog/hexo_localhost.PNG)
 
 
+test
+test
+test
+test
+test
+test
+test
+test
+
+
 ## 参考资料
 
 [https://blog.csdn.net/peterzhen40/article/details/78942293](https://blog.csdn.net/peterzhen40/article/details/78942293 "用Github Page+Hexo轻松搭建个人博客")
