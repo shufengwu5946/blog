@@ -70,7 +70,7 @@ index.css
 ```
 index.js文件内容：
 
-```
+```javascript
 window.onload = function(){
     document.getElementById('div1').textContent="Hello world";
 }
@@ -87,10 +87,10 @@ window.onload = function(){
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <script src="./index.js"></script>
 </head>
 <body>
     <div id="div1" class="div1"></div>
+    <script src="./index.js"></script>
 </body>
 </html>
 ```
@@ -115,7 +115,7 @@ module.exports = {
 
 在package.json中对scripts对象进行相关设置即可，设置方法如下。
 
-```
+```javascript
 {
   "name": "webpack-base-demo",
   "version": "1.0.0",
@@ -161,7 +161,7 @@ cheap-module-eval-source-map	|这是在打包文件时最快的生成source map�
 
 对小到中型的项目中，eval-source-map是一个很好的选项，再次强调你只应该开发阶段使用它，我们继续对上文新建的webpack.config.js，进行如下配置:
 
-```
+```javascript
 module.exports = {
   devtool: 'eval-source-map',
   entry:  __dirname + "/app/main.js",
@@ -192,7 +192,7 @@ historyApiFallback	|在开发单页应用时非常有用，它依赖于HTML5 his
 
 把这些命令加到webpack的配置文件中，现在的配置文件webpack.config.js如下所示
 
-```
+```javascript
 module.exports = {
   devtool: 'eval-source-map',
   entry:  __dirname + "/app/main.js",
@@ -211,7 +211,7 @@ module.exports = {
 
 在package.json中的scripts对象中添加如下命令，用以开启本地服务器：
 
-```
+```javascript
 "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack",
@@ -237,7 +237,7 @@ Loaders需要单独安装并且需要在webpack.config.js中的modules关键字�
 
 在app文件夹中创建带有问候信息的JSON文件(命名为config.json)
 
-```
+```javascript
 {
   "greetText": "Hello world"
 }
@@ -245,7 +245,7 @@ Loaders需要单独安装并且需要在webpack.config.js中的modules关键字�
 
 更新后的index.js
 
-```
+```javascript
 import config from './config.json';
 window.onload = function(){
     document.getElementById('div1').textContent=config.greetText;
@@ -274,7 +274,7 @@ npm install --save-dev babel-core babel-loader babel-preset-env
 ```
 在webpack中配置Babel的方法如下:
 
-```
+```javascript
 module.exports = {
     devtool: 'eval-source-map',
     entry: __dirname + "/app/index.js", //已多次提及的唯一入口文件
@@ -327,7 +327,7 @@ npm install --save-dev babel-preset-react
 ```
 webpack.config.js中更新module如下：
 
-```
+```javascript
 module: {
     rules: [{
         test: /(\.jsx|\.js)$/,
@@ -349,7 +349,7 @@ module: {
 npm install --save-dev react react-dom
 ```
 接下来我们使用ES6的语法，APP文件夹中新建Greeter.js文件并返回一个React组件
-```
+```javascript
 //Greeter.js
 import React, {Component} from 'react'
 import config from './config.json';
@@ -368,29 +368,21 @@ export default Greeter
 ```
 修改index.js如下，使用ES6的模块定义和渲染Greeter模块
 
+```javascript
 // index.js
 import React from 'react';
 import {render} from 'react-dom';
 import Greeter from './Greeter';
 
-render(<Greeter />, document.getElementById('root'));
+render(<Greeter />, document.getElementById('div1'));
+```
 
+重新使用npm start打包，并且运行npm run server，你应该可以在localhost:8080下看到与之前一样的内容，这说明react被正常打包了。
 
+#### Babel的配置
 
-
-
-
-
-
-
-
-重新使用npm start打包，如果之前打开的本地服务器没有关闭，你应该可以在localhost:8080下看到与之前一样的内容，这说明react和es6被正常打包了。
-
-localhost:8080
-
-Babel的配置
 Babel其实可以完全在 webpack.config.js 中进行配置，但是考虑到babel具有非常多的配置选项，在单一的webpack.config.js文件中进行配置往往使得这个文件显得太复杂，因此一些开发者支持把babel的配置选项放在一个单独的名为 ".babelrc" 的配置文件中。我们现在的babel的配置并不算复杂，不过之后我们会再加一些东西，因此现在我们就提取出相关部分，分两个配置文件进行配置（webpack会自动调用.babelrc里的babel配置选项），如下：
-
+```javascript
 module.exports = {
     entry: __dirname + "/app/main.js",//已多次提及的唯一入口文件
     output: {
@@ -415,22 +407,28 @@ module.exports = {
         ]
     }
 };
+```
+```javascript
 //.babelrc
 {
   "presets": ["react", "env"]
 }
+```
 到目前为止，我们已经知道了，对于模块，Webpack能提供非常强大的处理功能，那那些是模块呢。
 
-一切皆模块
+## 一切皆模块
+
 Webpack有一个不可不说的优点，它把所有的文件都都当做模块处理，JavaScript代码，CSS和fonts以及图片等等通过合适的loader都可以被处理。
 
-CSS
+### CSS
 webpack提供两个工具处理样式表，css-loader 和 style-loader，二者处理的任务不同，css-loader使你能够使用类似@import 和 url(...)的方法实现 require()的功能,style-loader将所有的计算后的样式加入页面中，二者组合在一起使你能够把样式表嵌入webpack打包后的JS文件中。
 
 继续上面的例子
-
+```
 //安装
 npm install --save-dev style-loader css-loader
+```
+```javascript
 //使用
 module.exports = {
 
@@ -457,49 +455,40 @@ module.exports = {
         ]
     }
 };
+```
 请注意这里对同一个文件引入多个loader的方法。
-接下来，在app文件夹里创建一个名字为"main.css"的文件，对一些元素设置样式
 
-/* main.css */
-html {
-  box-sizing: border-box;
-  -ms-text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
+接下来，在app文件夹里的index.css文件中，对一些元素设置样式
+
+```css
+/* index.css */
+div{
+    color:green;
 }
+```
+我们这里例子中用到的webpack只有单一的入口，其它的模块需要通过 import, require, url等与入口文件建立其关联，为了让webpack能找到index.css文件，我们把它导入index.js中，如下
 
-*, *:before, *:after {
-  box-sizing: inherit;
-}
-
-body {
-  margin: 0;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
-h1, h2, h3, h4, h5, h6, p, ul {
-  margin: 0;
-  padding: 0;
-}
-我们这里例子中用到的webpack只有单一的入口，其它的模块需要通过 import, require, url等与入口文件建立其关联，为了让webpack能找到”main.css“文件，我们把它导入”main.js “中，如下
-
-//main.js
+```javascript
+//index.js
 import React from 'react';
 import {render} from 'react-dom';
 import Greeter from './Greeter';
+import './index.css'; //使用require导入css文件
 
-import './main.css';//使用require导入css文件
-
-render(<Greeter />, document.getElementById('root'));
+render(<Greeter />, document.getElementById('div1'));
+```
 通常情况下，css会和js打包到同一个文件中，并不会打包为一个单独的css文件，不过通过合适的配置webpack也可以把css打包为单独的文件的。
+
 上面的代码说明webpack是怎么把css当做模块看待的，咱们继续看一个更加真实的css模块实践。
 
-CSS module
+### CSS module
+
 在过去的一些年里，JavaScript通过一些新的语言特性，更好的工具以及更好的实践方法（比如说模块化）发展得非常迅速。模块使得开发者把复杂的代码转化为小的，干净的，依赖声明明确的单元，配合优化工具，依赖管理和加载管理可以自动完成。
 
 不过前端的另外一部分，CSS发展就相对慢一些，大多的样式表却依旧巨大且充满了全局类名，维护和修改都非常困难。
 
 被称为CSS modules的技术意在把JS的模块化思想带入CSS中来，通过CSS模块，所有的类名，动画名默认都只作用于当前模块。Webpack对CSS模块化提供了非常好的支持，只需要在CSS loader中进行简单配置即可，然后就可以直接把CSS的类名传递到组件的代码中，这样做有效避免了全局污染。具体的代码如下
-
+```javascript
 module.exports = {
 
     ...
@@ -530,16 +519,16 @@ module.exports = {
         ]
     }
 };
+```
 我们在app文件夹下创建一个Greeter.css文件来进行一下测试
-
+```css
 /* Greeter.css */
-.root {
-  background-color: #eee;
-  padding: 10px;
-  border: 3px solid #ccc;
+.by{
+    background-color: yellow;
 }
+```
 导入.root到Greeter.js中
-
+```javascript
 import React, {Component} from 'react';
 import config from './config.json';
 import styles from './Greeter.css';//导入
@@ -547,7 +536,7 @@ import styles from './Greeter.css';//导入
 class Greeter extends Component{
   render() {
     return (
-      <div className={styles.root}> //使用cssModule添加类名的方法
+      <div className={styles.by}> //使用cssModule添加类名的方法
         {config.greetText}
       </div>
     );
@@ -555,305 +544,117 @@ class Greeter extends Component{
 }
 
 export default Greeter
-放心使用把，相同的类名也不会造成不同组件之间的污染。
+```
+重新运行npm start打包，运行npm run server，打开localhost:8080，文字背景变为黄色，div的class为“Greeter__by--U44rR”这样的形式，这样就可以保证不同组件之间不会存在相同的类名。
 
-应用了css module后的样式
+### CSS预处理器
 
-CSS modules 也是一个很大的主题，有兴趣的话可以去其官方文档了解更多。
+## 插件（Plugins）
 
-CSS预处理器
-Sass 和 Less 之类的预处理器是对原生CSS的拓展，它们允许你使用类似于variables, nesting, mixins, inheritance等不存在于CSS中的特性来写CSS，CSS预处理器可以这些特殊类型的语句转化为浏览器可识别的CSS语句，
-
-你现在可能都已经熟悉了，在webpack里使用相关loaders进行配置就可以使用了，以下是常用的CSS 处理loaders:
-
-Less Loader
-Sass Loader
-Stylus Loader
-不过其实也存在一个CSS的处理平台-PostCSS，它可以帮助你的CSS实现更多的功能，在其官方文档可了解更多相关知识。
-
-举例来说如何使用PostCSS，我们使用PostCSS来为CSS代码自动添加适应不同浏览器的CSS前缀。
-
-首先安装postcss-loader 和 autoprefixer（自动添加前缀的插件）
-
-npm install --save-dev postcss-loader autoprefixer
-接下来，在webpack配置文件中添加postcss-loader，在根目录新建postcss.config.js,并添加如下代码之后，重新使用npm start打包时，你写的css会自动根据Can i use里的数据添加不同前缀了。
-
-//webpack.config.js
-module.exports = {
-    ...
-    module: {
-        rules: [
-            {
-                test: /(\.jsx|\.js)$/,
-                use: {
-                    loader: "babel-loader"
-                },
-                exclude: /node_modules/
-            },
-            {
-                test: /\.css$/,
-                use: [
-                    {
-                        loader: "style-loader"
-                    }, {
-                        loader: "css-loader",
-                        options: {
-                            modules: true
-                        }
-                    }, {
-                        loader: "postcss-loader"
-                    }
-                ]
-            }
-        ]
-    }
-}
-// postcss.config.js
-module.exports = {
-    plugins: [
-        require('autoprefixer')
-    ]
-}
-至此，本文已经谈论了处理JS的Babel和处理CSS的PostCSS的基本用法，它们其实也是两个单独的平台，配合webpack可以很好的发挥它们的作用。接下来介绍Webpack中另一个非常重要的功能-Plugins
-
-插件（Plugins）
 插件（Plugins）是用来拓展Webpack功能的，它们会在整个构建过程中生效，执行相关的任务。
+
 Loaders和Plugins常常被弄混，但是他们其实是完全不同的东西，可以这么来说，loaders是在打包构建过程中用来处理源文件的（JSX，Scss，Less..），一次处理一个，插件并不直接操作单个文件，它直接对整个构建过程其作用。
 
-Webpack有很多内置插件，同时也有很多第三方插件，可以让我们完成更加丰富的功能。
+Webpack有很多内置插件，同时也有很多第三方插件(https://webpack.js.org/plugins/)，可以让我们完成更加丰富的功能。
 
-使用插件的方法
-要使用某个插件，我们需要通过npm安装它，然后要做的就是在webpack配置中的plugins关键字部分添加该插件的一个实例（plugins是一个数组）继续上面的例子，我们添加了一个给打包后代码添加版权声明的插件。
+### 使用插件的方法
 
-const webpack = require('webpack');
+要使用某个插件，我们需要通过npm安装它，然后要做的就是在webpack配置中的plugins关键字部分添加该插件的一个实例（plugins是一个数组）继续上面的例子，我们添加了一个给打包后代码添加版权声明的插件[BannerPlugin](https://webpack.js.org/plugins/banner-plugin/)。
+```javascript
+const webpack = require('webpack'); //引入webpack
 
 module.exports = {
 ...
     module: {
-        rules: [
-            {
-                test: /(\.jsx|\.js)$/,
-                use: {
-                    loader: "babel-loader"
-                },
-                exclude: /node_modules/
+        rules: [{
+            test: /(\.jsx|\.js)$/,
+            use: {
+                loader: "babel-loader"
             },
-            {
-                test: /\.css$/,
-                use: [
-                    {
-                        loader: "style-loader"
-                    }, {
-                        loader: "css-loader",
-                        options: {
-                            modules: true
-                        }
-                    }, {
-                        loader: "postcss-loader"
+            exclude: /node_modules/
+        }, {
+            test: /\.css$/,
+            use: [
+                {
+                    loader: "style-loader"
+                }, {
+                    loader: "css-loader",
+                    options: {
+                        modules: true, // 指定启用css modules
+                        localIdentName: '[name]__[local]--[hash:base64:5]' // 指定css的类名格式
                     }
-                ]
-            }
-        ]
+                }
+            ]
+        }]
     },
     plugins: [
         new webpack.BannerPlugin('版权所有，翻版必究')
     ],
 };
+```
 通过这个插件，打包后的JS文件显示如下
 
-版权所有，翻版必究
+```javascript
+/*! 版权所有，翻版必究 */
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+```
 
-这就是webpack插件的基础用法了，下面给大家推荐几个常用的插件
+这就是webpack插件的基础用法了，下面给大家推荐几个常用的插件.
 
-HtmlWebpackPlugin
+### HtmlWebpackPlugin
+
 这个插件的作用是依据一个简单的index.html模板，生成一个自动引用你打包后的JS文件的新index.html。这在每次生成的js文件名称不同时非常有用（比如添加了hash值）。
 
-安装
-
+#### 安装
+```
 npm install --save-dev html-webpack-plugin
+```
+
 这个插件自动完成了我们之前手动做的一些事情，在正式使用之前需要对一直以来的项目结构做一些更改：
 
-移除public文件夹，利用此插件，index.html文件会自动生成，此外CSS已经通过前面的操作打包到JS中了。
-在app目录下，创建一个index.tmpl.html文件模板，这个模板包含title等必须元素，在编译过程中，插件会依据此模板生成最终的html页面，会自动添加所依赖的 css, js，favicon等文件，index.tmpl.html中的模板源代码如下：
+1. 移除dist文件夹，利用此插件，index.html文件会自动生成，此外CSS已经通过前面的操作打包到JS中了。
+
+2. 在app目录下，创建一个index.tmpl.html文件模板，这个模板包含title等必须元素，在编译过程中，插件会依据此模板生成最终的html页面，会自动添加所依赖的 css, js，favicon等文件，index.tmpl.html中的模板源代码如下：
+```html
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Webpack Sample Project</title>
-  </head>
-  <body>
-    <div id='root'>
-    </div>
-  </body>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+</head>
+
+<body>
+    <div id="div1" class="div1"></div>
+</body>
+
 </html>
-3.更新webpack的配置文件，方法同上,新建一个build文件夹用来存放最终的输出文件
-
+```
+3. 更新webpack的配置文件，方法同上,新建一个build文件夹用来存放最终的输出文件
+```javascript
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    entry: __dirname + "/app/main.js",//已多次提及的唯一入口文件
-    output: {
-        path: __dirname + "/build",
-        filename: "bundle.js"
-    },
     devtool: 'eval-source-map',
-    devServer: {
-        contentBase: "./public",//本地服务器所加载的页面所在的目录
-        historyApiFallback: true,//不跳转
-        inline: true//实时刷新
-    },
-    module: {
-        rules: [
-            {
-                test: /(\.jsx|\.js)$/,
-                use: {
-                    loader: "babel-loader"
-                },
-                exclude: /node_modules/
-            },
-            {
-                test: /\.css$/,
-                use: [
-                    {
-                        loader: "style-loader"
-                    }, {
-                        loader: "css-loader",
-                        options: {
-                            modules: true
-                        }
-                    }, {
-                        loader: "postcss-loader"
-                    }
-                ]
-            }
-        ]
-    },
-    plugins: [
-        new webpack.BannerPlugin('版权所有，翻版必究'),
-        new HtmlWebpackPlugin({
-            template: __dirname + "/app/index.tmpl.html"//new 一个这个插件的实例，并传入相关的参数
-        })
-    ],
-};
-再次执行npm start你会发现，build文件夹下面生成了bundle.js和index.html。
-
-build文件夹
-
-Hot Module Replacement
-Hot Module Replacement（HMR）也是webpack里很有用的一个插件，它允许你在修改组件代码后，自动刷新实时预览修改后的效果。
-
-在webpack中实现HMR也很简单，只需要做两项配置
-
-在webpack配置文件中添加HMR插件；
-在Webpack Dev Server中添加“hot”参数；
-不过配置完这些后，JS模块其实还是不能自动热加载的，还需要在你的JS模块中执行一个Webpack提供的API才能实现热加载，虽然这个API不难使用，但是如果是React模块，使用我们已经熟悉的Babel可以更方便的实现功能热加载。
-
-整理下我们的思路，具体实现方法如下
-
-Babel和webpack是独立的工具
-二者可以一起工作
-二者都可以通过插件拓展功能
-HMR是一个webpack插件，它让你能浏览器中实时观察模块修改后的效果，但是如果你想让它工作，需要对模块进行额外的配额；
-Babel有一个叫做react-transform-hrm的插件，可以在不对React模块进行额外的配置的前提下让HMR正常工作；
-还是继续上例来实际看看如何配置
-
-const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-
-module.exports = {
-    entry: __dirname + "/app/main.js",//已多次提及的唯一入口文件
+    entry: __dirname + "/app/index.js", //已多次提及的唯一入口文件
     output: {
-        path: __dirname + "/build",
-        filename: "bundle.js"
+        path: __dirname + "/dist", //打包后的文件存放的地方
+        filename: "index.js" //打包后输出文件的文件名
     },
-    devtool: 'eval-source-map',
+
     devServer: {
-        contentBase: "./public",//本地服务器所加载的页面所在的目录
-        historyApiFallback: true,//不跳转
-        inline: true,
-        hot: true
-    },
-    module: {
-        rules: [
-            {
-                test: /(\.jsx|\.js)$/,
-                use: {
-                    loader: "babel-loader"
-                },
-                exclude: /node_modules/
-            },
-            {
-                test: /\.css$/,
-                use: [
-                    {
-                        loader: "style-loader"
-                    }, {
-                        loader: "css-loader",
-                        options: {
-                            modules: true
-                        }
-                    }, {
-                        loader: "postcss-loader"
-                    }
-                ]
-            }
-        ]
-    },
-    plugins: [
-        new webpack.BannerPlugin('版权所有，翻版必究'),
-        new HtmlWebpackPlugin({
-            template: __dirname + "/app/index.tmpl.html"//new 一个这个插件的实例，并传入相关的参数
-        }),
-        new webpack.HotModuleReplacementPlugin()//热加载插件
-    ],
-};
-   
-安装react-transform-hmr
-
-npm install --save-dev babel-plugin-react-transform react-transform-hmr
-配置Babel
-
-// .babelrc
-{
-  "presets": ["react", "env"],
-  "env": {
-    "development": {
-    "plugins": [["react-transform", {
-       "transforms": [{
-         "transform": "react-transform-hmr",
-         
-         "imports": ["react"],
-         
-         "locals": ["module"]
-       }]
-     }]]
-    }
-  }
-}
-现在当你使用React时，可以热加载模块了,每次保存就能在浏览器上看到更新内容。
-
-产品阶段的构建
-目前为止，我们已经使用webpack构建了一个完整的开发环境。但是在产品阶段，可能还需要对打包的文件进行额外的处理，比如说优化，压缩，缓存以及分离CSS和JS。
-
-对于复杂的项目来说，需要复杂的配置，这时候分解配置文件为多个小的文件可以使得事情井井有条，以上面的例子来说，我们创建一个webpack.production.config.js的文件，在里面加上基本的配置,它和原始的webpack.config.js很像，如下
-
-// webpack.production.config.js
-const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-
-module.exports = {
-    entry: __dirname + "/app/main.js", //已多次提及的唯一入口文件
-    output: {
-        path: __dirname + "/build",
-        filename: "bundle.js"
-    },
-    devtool: 'null', //注意修改了这里，这能大大压缩我们的打包代码
-    devServer: {
-        contentBase: "./public", //本地服务器所加载的页面所在的目录
+        contentBase: "./dist", //本地服务器所加载的页面所在的目录
         historyApiFallback: true, //不跳转
-        inline: true,
-        hot: true
+        inline: true //实时刷新
     },
     module: {
         rules: [{
@@ -864,27 +665,86 @@ module.exports = {
             exclude: /node_modules/
         }, {
             test: /\.css$/,
-            use: ExtractTextPlugin.extract({
-                fallback: "style-loader",
-                use: [{
+            use: [
+                {
+                    loader: "style-loader"
+                }, {
                     loader: "css-loader",
                     options: {
-                        modules: true
+                        modules: true, // 指定启用css modules
+                        localIdentName: '[name]__[local]--[hash:base64:5]' // 指定css的类名格式
                     }
-                }, {
-                    loader: "postcss-loader"
-                }],
-            })
+                }
+            ]
         }]
     },
     plugins: [
         new webpack.BannerPlugin('版权所有，翻版必究'),
         new HtmlWebpackPlugin({
-            template: __dirname + "/app/index.tmpl.html" //new 一个这个插件的实例，并传入相关的参数
-        }),
-        new webpack.HotModuleReplacementPlugin() //热加载插件
+            template: __dirname + "/app/index.tmpl.html"//new 一个这个插件的实例，并传入相关的参数
+        })
     ],
-};
+}
+```
+再次执行npm start你会发现，build文件夹下面生成了index.js和index.html。
+
+
+### Hot Module Replacement
+
+## 产品阶段的构建
+
+目前为止，我们已经使用webpack构建了一个完整的开发环境。但是在产品阶段，可能还需要对打包的文件进行额外的处理，比如说优化，压缩，缓存以及分离CSS和JS。
+
+对于复杂的项目来说，需要复杂的配置，这时候分解配置文件为多个小的文件可以使得事情井井有条，以上面的例子来说，我们创建一个webpack.production.config.js的文件，在里面加上基本的配置,它和原始的webpack.config.js很像，如下
+```javascript
+// webpack.production.config.js
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+    devtool: 'null', //注意修改了这里，这能大大压缩我们的打包代码
+    entry: __dirname + "/app/index.js", //已多次提及的唯一入口文件
+    output: {
+        path: __dirname + "/dist", //打包后的文件存放的地方
+        filename: "index.js" //打包后输出文件的文件名
+    },
+
+    devServer: {
+        contentBase: "./dist", //本地服务器所加载的页面所在的目录
+        historyApiFallback: true, //不跳转
+        inline: true //实时刷新
+    },
+    module: {
+        rules: [{
+            test: /(\.jsx|\.js)$/,
+            use: {
+                loader: "babel-loader"
+            },
+            exclude: /node_modules/
+        }, {
+            test: /\.css$/,
+            use: [
+                {
+                    loader: "style-loader"
+                }, {
+                    loader: "css-loader",
+                    options: {
+                        modules: true, // 指定启用css modules
+                        localIdentName: '[name]__[local]--[hash:base64:5]' // 指定css的类名格式
+                    }
+                }
+            ]
+        }]
+    },
+    plugins: [
+        new webpack.BannerPlugin('版权所有，翻版必究'),
+        new HtmlWebpackPlugin({
+            template: __dirname + "/app/index.tmpl.html"//new 一个这个插件的实例，并传入相关的参数
+        })
+    ],
+}
+```
+```javascript
 //package.json
 {
   "name": "test",
@@ -907,77 +767,114 @@ module.exports = {
     "react-dom": "^15.6.1"
   }
 }
-注意:如果是window电脑，build需要配置为"build": "set NODE_ENV=production && webpack --config ./webpack.production.config.js --progress".谢谢评论区简友提醒。
-优化插件
+
+{
+  "name": "webpack-base-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "NODE_ENV=production webpack --config ./webpack.production.config.js --progress"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "css-loader": "^1.0.1",
+    "html-webpack-plugin": "^3.2.0",
+    "react": "^16.6.1",
+    "react-dom": "^16.6.1",
+    "style-loader": "^0.23.1",
+    "webpack": "^4.25.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.10"
+  },
+  "dependencies": {}
+}
+
+```
+> 注意:如果是window电脑，build需要配置为"build": "set NODE_ENV=production && webpack --config ./webpack.production.config.js --progress".谢谢评论区简友提醒。
+
+### 优化插件
+
 webpack提供了一些在发布阶段非常有用的优化插件，它们大多来自于webpack社区，可以通过npm安装，通过以下插件可以完成产品发布阶段所需的功能
 
-OccurenceOrderPlugin :为组件分配ID，通过这个插件webpack可以分析和优先考虑使用最多的模块，并为它们分配最小的ID
-UglifyJsPlugin：压缩JS代码；
-ExtractTextPlugin：分离CSS和JS文件
-我们继续用例子来看看如何添加它们，OccurenceOrder 和 UglifyJS plugins 都是内置插件，你需要做的只是安装其它非内置插件
+* OccurenceOrderPlugin :为组件分配ID，通过这个插件webpack可以分析和优先考虑使用最多的模块，并为它们分配最小的ID
 
-npm install --save-dev extract-text-webpack-plugin
+* UglifyjsWebpackPlugin：压缩JS代码；
+
+* ExtractTextPlugin：分离CSS和JS文件(暂时不支持webpack 4，本文档不予讨论)
+
+我们继续用例子来看看如何添加它们，OccurenceOrder是内置插件，你需要做的只是安装其它非内置插件
+
+```
+npm install --save-dev uglifyjs-webpack-plugin
+
+```
 在配置文件的plugins后引用它们
-
+```javascript
 // webpack.production.config.js
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+// extract-text-webpack-plugin暂时不支持webpack4
+// const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const UglifyjsWebpackPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
-    entry: __dirname + "/app/main.js",//已多次提及的唯一入口文件
+    devtool: 'null', //注意修改了这里，这能大大压缩我们的打包代码
+    entry: __dirname + "/app/index.js", //已多次提及的唯一入口文件
     output: {
-        path: __dirname + "/build",
-        filename: "bundle.js"
+        path: __dirname + "/dist", //打包后的文件存放的地方
+        filename: "index.js" //打包后输出文件的文件名
     },
-    devtool: 'none',
+
     devServer: {
-        contentBase: "./public",//本地服务器所加载的页面所在的目录
-        historyApiFallback: true,//不跳转
-        inline: true,
-        hot: true
+        contentBase: "./dist", //本地服务器所加载的页面所在的目录
+        historyApiFallback: true, //不跳转
+        inline: true //实时刷新
     },
     module: {
-        rules: [
-            {
-                test: /(\.jsx|\.js)$/,
-                use: {
-                    loader: "babel-loader"
-                },
-                exclude: /node_modules/
+        rules: [{
+            test: /(\.jsx|\.js)$/,
+            use: {
+                loader: "babel-loader"
             },
-            {
-                test: /\.css$/,
-                use: [
-                    {
-                        loader: "style-loader"
-                    }, {
-                        loader: "css-loader",
-                        options: {
-                            modules: true
-                        }
-                    }, {
-                        loader: "postcss-loader"
+            exclude: /node_modules/
+        }, {
+            test: /\.css$/,
+            use: [
+                {
+                    loader: "style-loader"
+                }, {
+                    loader: "css-loader",
+                    options: {
+                        modules: true, // 指定启用css modules
+                        localIdentName: '[name]__[local]--[hash:base64:5]' // 指定css的类名格式
                     }
-                ]
-            }
-        ]
+                }
+            ]
+        }]
     },
     plugins: [
         new webpack.BannerPlugin('版权所有，翻版必究'),
         new HtmlWebpackPlugin({
-            template: __dirname + "/app/index.tmpl.html"
+            template: __dirname + "/app/index.tmpl.html"//new 一个这个插件的实例，并传入相关的参数
         }),
         new webpack.optimize.OccurrenceOrderPlugin(),
-        new webpack.optimize.UglifyJsPlugin(),
-        new ExtractTextPlugin("style.css")
+        new UglifyjsWebpackPlugin(),
+        // extract-text-webpack-plugin暂时不支持webpack4
+        // new ExtractTextPlugin("style.css"),
     ],
-};
-此时执行npm run build可以看见代码是被压缩后的
+}
+```
+此时执行npm run build可以看见代码是被压缩后的。
 
-压缩后的代码
+### 缓存
 
-缓存
 缓存无处不在，使用缓存的最好方法是保证你的文件名和文件内容是匹配的（内容改变，名称相应改变）
 
 webpack可以把一个哈希值添加到打包的文件名中，使用方法如下,添加特殊的字符串混合体（[name], [id] and [hash]）到输出文件名前
