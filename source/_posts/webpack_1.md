@@ -1,45 +1,17 @@
 ---
-title: webpack 学习笔记
+title: webpack 学习笔记（一）
 date: 2018-11-3 14:52:11
 tags:
     - webpack
 ---
 
-# webpack 学习笔记
+本文主要参考文章：
 
-## 什么是WebPack，为什么要使用它？
-
-### 为什要使用WebPack
-
-现今的很多网页其实可以看做是功能丰富的应用，它们拥有着复杂的JavaScript代码和一大堆依赖包。为了简化开发的复杂度，前端社区涌现出了很多好的实践方法
-
-* 模块化，让我们可以把复杂的程序细化为小的文件;
-
-* 类似于TypeScript这种在JavaScript基础上拓展的开发语言：使我们能够实现目前版本的JavaScript不能直接使用的特性，并且之后还能转换为JavaScript文件使浏览器可以识别；
-
-* Scss，less等CSS预处理器
-
-* ...
-
-这些改进确实大大的提高了我们的开发效率，但是利用它们开发的文件往往需要进行额外的处理才能让浏览器识别,而手动处理又是非常繁琐的，这就为WebPack类的工具的出现提供了需求。
-
-### 什么是Webpack
-WebPack可以看做是模块打包机：它做的事情是，分析你的项目结构，找到JavaScript模块以及其它的一些浏览器不能直接运行的拓展语言（Scss，TypeScript等），并将其转换和打包为合适的格式供浏览器使用。
-
-WebPack和Grunt以及Gulp相比有什么特性
-其实Webpack和另外两个并没有太多的可比性，Gulp/Grunt是一种能够优化前端的开发流程的工具，而WebPack是一种模块化的解决方案，不过Webpack的优点使得Webpack在很多场景下可以替代Gulp/Grunt类的工具。
-
-Grunt和Gulp的工作方式是：在一个配置文件中，指明对某些文件进行类似编译，组合，压缩等任务的具体步骤，工具之后可以自动替你完成这些任务。
-Grunt和Gulp的工作流程
-
-Webpack的工作方式是：把你的项目当做一个整体，通过一个给定的主文件（如：index.js），Webpack将从这个文件开始找到你的项目的所有依赖文件，使用loaders处理它们，最后打包为一个（或多个）浏览器可识别的JavaScript文件。
-Webpack工作方式
-
-如果实在要把二者进行比较，Webpack的处理速度更快更直接，能打包更多不同类型的文件。
+[《入门 Webpack，看这篇就够了》](https://segmentfault.com/a/1190000006178770?utm_source=tag-newest)
 
 ## 开始使用Webpack
 
-初步了解了Webpack工作方式后，我们一步步的开始学习使用Webpack。
+我们一步步的开始学习使用Webpack。
 
 ### 安装
 
@@ -51,6 +23,8 @@ Webpack工作方式
 npm init
 ```
 
+<!--more-->
+
 输入这个命令后，终端会问你一系列诸如项目名称，项目描述，作者等信息，不过不用担心，如果你不准备在npm中发布你的模块，这些问题的答案都不重要，回车默认即可。
 
 package.json文件已经就绪，我们在本项目中安装Webpack作为依赖包
@@ -58,11 +32,11 @@ package.json文件已经就绪，我们在本项目中安装Webpack作为依赖�
 // 安装Webpack
 npm install --save-dev webpack
 
-//安装webpack-cli
+// 安装webpack-cli
 npm install --save-dev webpack-cli
 ```
 
-回到webpack-base-demo文件夹，并在里面创建app文件夹app文件夹用来存放原始数据和我们将写的JavaScript模块，接下来我们在app文件夹中创建两个文件:
+回到webpack-base-demo文件夹，并在里面创建app文件夹，app文件夹用来存放原始数据和我们将写的JavaScript模块，接下来我们在app文件夹中创建两个文件:
 
 ```
 index.js
@@ -115,7 +89,7 @@ module.exports = {
 
 在package.json中对scripts对象进行相关设置即可，设置方法如下。
 
-```javascript
+```json
 {
   "name": "webpack-base-demo",
   "version": "1.0.0",
@@ -164,10 +138,10 @@ cheap-module-eval-source-map	|这是在打包文件时最快的生成source map�
 ```javascript
 module.exports = {
   devtool: 'eval-source-map',
-  entry:  __dirname + "/app/main.js",
+  entry:  __dirname + "/app/index.js",
   output: {
-    path: __dirname + "/public",
-    filename: "bundle.js"
+    path: __dirname + "/dist",
+    filename: "index.js"
   }
 }
 ```
@@ -185,7 +159,7 @@ devserver作为webpack配置选项中的一项，以下是它的一些配置选�
 
 devserver的配置选项	|功能描述
 -|-
-contentBase	|默认webpack-dev-server会为根文件夹提供本地服务器，如果想为另外一个目录下的文件提供本地服务器，应该在这里设置其所在目录（本例设置到“public"目录）
+contentBase	|默认webpack-dev-server会为根文件夹提供本地服务器，如果想为另外一个目录下的文件提供本地服务器，应该在这里设置其所在目录（本例设置到“dist"目录）
 port	|设置默认监听端口，如果省略，默认为”8080“
 inline	|设置为true，当源文件改变时会自动刷新页面
 historyApiFallback	|在开发单页应用时非常有用，它依赖于HTML5 history API，如果设置为true，所有的跳转将指向index.html
@@ -195,10 +169,10 @@ historyApiFallback	|在开发单页应用时非常有用，它依赖于HTML5 his
 ```javascript
 module.exports = {
   devtool: 'eval-source-map',
-  entry:  __dirname + "/app/main.js",
+  entry:  __dirname + "/app/index.js",
   output: {
-    path: __dirname + "/public",
-    filename: "bundle.js"
+    path: __dirname + "/dist",
+    filename: "index.js"
   },
 
   devServer: {
@@ -211,16 +185,15 @@ module.exports = {
 
 在package.json中的scripts对象中添加如下命令，用以开启本地服务器：
 
-```javascript
+```json
 "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack",
-    "server": "webpack-dev-server --open"
+    "start": "webpack --mode development",
+    "server": "webpack-dev-server --open --mode development"
 },
 ```
 
-在终端中输入npm run server即可在本地的8080端口查看结果,成功后页面显示“Hello world";
-}”。
+在终端中输入npm run server即可在本地的8080端口查看结果,成功后页面显示“Hello world”。
 
 ### Loaders
 
@@ -230,14 +203,14 @@ Loaders需要单独安装并且需要在webpack.config.js中的modules关键字�
 
 * test：一个用以匹配loaders所处理文件的拓展名的正则表达式（必须）
 * loader：loader的名称（必须）
-* include/exclude:手动添加必须处理的文件（文件夹）或屏蔽不需要处理的文件（文件夹）（可选）；
+* include/exclude：手动添加必须处理的文件（文件夹）或屏蔽不需要处理的文件（文件夹）（可选）；
 * query：为loaders提供额外的设置选项（可选）
 
 不过在配置loader之前，我们把index.js里的“Hello world”放在一个单独的JSON文件里,并通过合适的配置使index.js可以读取该JSON文件的值，各文件修改后的代码如下：
 
 在app文件夹中创建带有问候信息的JSON文件(命名为config.json)
 
-```javascript
+```json
 {
   "greetText": "Hello world"
 }
@@ -252,7 +225,7 @@ window.onload = function(){
 }
 ```
 
-> 注 由于webpack3.*/webpack2.*已经内置可处理JSON文件，这里我们无需再添加webpack1.*需要的json-loader。在看如何具体使用loader之前我们先看看Babel是什么？
+> **注** 由于webpack4.* / webpack3.* / webpack2.* 已经内置可处理JSON文件，这里我们无需再添加webpack1.*需要的json-loader。在看如何具体使用loader之前我们先看看Babel是什么？
 
 ### Babel
 
@@ -384,14 +357,14 @@ render(<Greeter />, document.getElementById('div1'));
 Babel其实可以完全在 webpack.config.js 中进行配置，但是考虑到babel具有非常多的配置选项，在单一的webpack.config.js文件中进行配置往往使得这个文件显得太复杂，因此一些开发者支持把babel的配置选项放在一个单独的名为 ".babelrc" 的配置文件中。我们现在的babel的配置并不算复杂，不过之后我们会再加一些东西，因此现在我们就提取出相关部分，分两个配置文件进行配置（webpack会自动调用.babelrc里的babel配置选项），如下：
 ```javascript
 module.exports = {
-    entry: __dirname + "/app/main.js",//已多次提及的唯一入口文件
+    entry: __dirname + "/app/index.js",//已多次提及的唯一入口文件
     output: {
-        path: __dirname + "/public",//打包后的文件存放的地方
-        filename: "bundle.js"//打包后输出文件的文件名
+        path: __dirname + "/dist",//打包后的文件存放的地方
+        filename: "index.js"//打包后输出文件的文件名
     },
     devtool: 'eval-source-map',
     devServer: {
-        contentBase: "./public",//本地服务器所加载的页面所在的目录
+        contentBase: "./dist",//本地服务器所加载的页面所在的目录
         historyApiFallback: true,//不跳转
         inline: true//实时刷新
     },
@@ -549,6 +522,8 @@ export default Greeter
 
 ### CSS预处理器
 
+(后续补充)
+
 ## 插件（Plugins）
 
 插件（Plugins）是用来拓展Webpack功能的，它们会在整个构建过程中生效，执行相关的任务。
@@ -638,7 +613,7 @@ npm install --save-dev html-webpack-plugin
 
 </html>
 ```
-3. 更新webpack的配置文件，方法同上,新建一个build文件夹用来存放最终的输出文件
+3. 更新webpack的配置文件。
 ```javascript
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -686,10 +661,11 @@ module.exports = {
     ],
 }
 ```
-再次执行npm start你会发现，build文件夹下面生成了index.js和index.html。
-
+再次执行npm start你会发现，dist文件夹会重新生成，并文件夹下面生成了index.js和index.html。
 
 ### Hot Module Replacement
+
+（后续补充）
 
 ## 产品阶段的构建
 
@@ -744,30 +720,8 @@ module.exports = {
     ],
 }
 ```
-```javascript
+```json
 //package.json
-{
-  "name": "test",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack",
-    "server": "webpack-dev-server --open",
-    "build": "NODE_ENV=production webpack --config ./webpack.production.config.js --progress"
-  },
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-...
-  },
-  "dependencies": {
-    "react": "^15.6.1",
-    "react-dom": "^15.6.1"
-  }
-}
-
 {
   "name": "webpack-base-demo",
   "version": "1.0.0",
@@ -775,6 +729,8 @@ module.exports = {
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack --mode development",
+    "server": "webpack-dev-server --open --mode development",
     "build": "NODE_ENV=production webpack --config ./webpack.production.config.js --progress"
   },
   "author": "",
@@ -797,23 +753,22 @@ module.exports = {
 }
 
 ```
-> 注意:如果是window电脑，build需要配置为"build": "set NODE_ENV=production && webpack --config ./webpack.production.config.js --progress".谢谢评论区简友提醒。
+> 注意：如果是window电脑，build需要配置为"build": "set NODE_ENV=production && webpack --config ./webpack.production.config.js --progress"。谢谢评论区简友提醒。
 
 ### 优化插件
 
 webpack提供了一些在发布阶段非常有用的优化插件，它们大多来自于webpack社区，可以通过npm安装，通过以下插件可以完成产品发布阶段所需的功能
 
-* OccurenceOrderPlugin :为组件分配ID，通过这个插件webpack可以分析和优先考虑使用最多的模块，并为它们分配最小的ID
+* OccurenceOrderPlugin：为组件分配ID，通过这个插件webpack可以分析和优先考虑使用最多的模块，并为它们分配最小的ID
 
 * UglifyjsWebpackPlugin：压缩JS代码；
 
-* ExtractTextPlugin：分离CSS和JS文件(暂时不支持webpack 4，本文档不予讨论)
+* ExtractTextPlugin：分离CSS和JS文件（暂时不支持webpack 4，本文档不予讨论）
 
 我们继续用例子来看看如何添加它们，OccurenceOrder是内置插件，你需要做的只是安装其它非内置插件
 
 ```
 npm install --save-dev uglifyjs-webpack-plugin
-
 ```
 在配置文件的plugins后引用它们
 ```javascript
@@ -879,45 +834,52 @@ module.exports = {
 
 webpack可以把一个哈希值添加到打包的文件名中，使用方法如下,添加特殊的字符串混合体（[name], [id] and [hash]）到输出文件名前
 
+```javascript
+// webpack.production.config.js
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+// extract-text-webpack-plugin暂时不支持webpack4
+// const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const UglifyjsWebpackPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
-..
+...
+    entry: __dirname + "/app/index.js", //已多次提及的唯一入口文件
     output: {
-        path: __dirname + "/build",
-        filename: "bundle-[hash].js"
+        path: __dirname + "/dist", //打包后的文件存放的地方
+        filename: "index-[hash].js" //打包后输出文件的文件名
     },
-   ...
-};
+    ...
+}
+```
 现在用户会有合理的缓存了。
 
-带hash值的js名
+![带hash值的js名](webpack_1/webpack_cache.PNG)
 
-去除build文件中的残余文件
+### 去除dist文件中的残余文件
+
 添加了hash之后，会导致改变文件内容后重新打包时，文件名不同而内容越来越多，因此这里介绍另外一个很好用的插件clean-webpack-plugin。
 
-安装：
-cnpm install clean-webpack-plugin --save-dev
+**安装**：
 
-使用：
+```
+npm install clean-webpack-plugin --save-dev
+```
+
+**使用**：
 
 引入clean-webpack-plugin插件后在配置文件的plugins中做相应配置即可：
 
+```javascript
 const CleanWebpackPlugin = require("clean-webpack-plugin");
   plugins: [
     ...// 这里是之前配置的其它各种插件
-    new CleanWebpackPlugin('build/*.*', {
+    new CleanWebpackPlugin('dist/*.*', {
       root: __dirname,
       verbose: true,
       dry: false
   })
   ]
-关于clean-webpack-plugin的详细使用可参考这里
+```
 
-总结
-其实这是一年前的文章了，趁周末重新运行和修改了一下，现在所有的代码都可以正常运行，所用webpack基于最新的webpack3.5.3。希望依旧能对你有帮助。
-这是一篇好长的文章，谢谢你的耐心，能仔细看到了这里，大概半个月前我第一次自己一步步配置项目所需的Webpack后就一直想写一篇笔记做总结，几次动笔都不能让自己满意，总觉得写不清楚。其实关于Webpack本文讲述得仍不完全，不过相信你看完后已经进入Webpack的大门，能够更好的探索其它的关于Webpack的知识了。
-
-欢迎大家在文后发表自己的观点讨论。
+关于clean-webpack-plugin的详细使用可参考[这里](https://github.com/johnagan/clean-webpack-plugin)。

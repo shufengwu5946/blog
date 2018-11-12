@@ -5,11 +5,23 @@
 # Site
 title: wushufeng的博客
 subtitle: wushufeng的博客
-description:
-keywords:
+description: wushufeng的博客
+keywords: 大前端开发
 author: wushufeng
-language: zh
+language: zh-CN
 timezone:
+
+# Header
+menu:
+  - page: home
+    directory: .
+    icon: fa-home
+  - page: archive
+    directory: archives/
+    icon: fa-archive
+  - page: about
+    directory: about/
+    icon: fa-user
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
@@ -41,7 +53,7 @@ future: true
 highlight:
   enable: true
   line_number: true
-  auto_detect: false
+  auto_detect: true
   tab_replace:
   
 # Home page setting
@@ -73,7 +85,7 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: aircloud
+theme: BlueLake
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
@@ -83,3 +95,33 @@ deploy:
   branch: master
 
 sidebar-avatar: img/avatar.jpg
+
+stylus:
+  compress: true
+
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: true
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: false
+    tags: true
+
+about:
+  photo_url: http://obzf7z93c.bkt.clouddn.com/themeauthor.jpg
+  items:
+  - label: email
+    icon: 
+    url: 594695686@qq.com
+    title: 
