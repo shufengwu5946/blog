@@ -1058,31 +1058,40 @@ d instanceof Object // true
 
 instanceof的原理是检查右边构造函数的prototype属性，是否在左边对象的原型链上。有一种特殊情况，就是左边对象的原型链上，只有null对象。这时，instanceof**判断会失真**。
 
+```javascript
 var obj = Object.create(null);
 typeof obj // "object"
 Object.create(null) instanceof Object // false
+```
 上面代码中，Object.create(null)返回一个新对象obj，它的原型是null（Object.create的详细介绍见后文）。右边的构造函数Object的prototype属性，不在左边的原型链上，因此instanceof就认为obj不是Object的实例。但是，只要一个对象的原型不是null，instanceof运算符的判断就不会失真。
 
-instanceof运算符的一个用处，是判断值的类型。
-
+instanceof运算符的一个用处，是**判断值的类型**。
+```javascript
 var x = [1, 2, 3];
 var y = {};
 x instanceof Array // true
 y instanceof Object // true
+```
 上面代码中，instanceof运算符判断，变量x是数组，变量y是对象。
 
-注意，instanceof运算符只能用于对象，不适用原始类型的值。
+> 注意，instanceof运算符只能用于对象，不适用原始类型的值。
 
+```javascript
 var s = 'hello';
 s instanceof String // false
+```
+
 上面代码中，字符串不是String对象的实例（因为字符串不是对象），所以返回false。
 
 此外，对于undefined和null，instanceOf运算符总是返回false。
 
+```javascript
 undefined instanceof Object // false
 null instanceof Object // false
+```
 利用instanceof运算符，还可以巧妙地解决，调用构造函数时，忘了加new命令的问题。
 
+```javascript
 function Fubar (foo, bar) {
   if (this instanceof Fubar) {
     this._foo = foo;
@@ -1091,31 +1100,38 @@ function Fubar (foo, bar) {
     return new Fubar(foo, bar);
   }
 }
+```
+
 上面代码使用instanceof运算符，在函数体内部判断this关键字是否为构造函数Fubar的实例。如果不是，就表明忘了加new命令。
 
-构造函数的继承
-让一个构造函数继承另一个构造函数，是非常常见的需求。这可以分成两步实现。第一步是在子类的构造函数中，调用父类的构造函数。
+### 构造函数的继承
 
+**第一步**是在子类的构造函数中，调用父类的构造函数。
+```javascript
 function Sub(value) {
   Super.call(this);
   this.prop = value;
 }
+```
 上面代码中，Sub是子类的构造函数，this是子类的实例。在实例上调用父类的构造函数Super，就会让子类实例具有父类实例的属性。
 
-第二步，是让子类的原型指向父类的原型，这样子类就可以继承父类原型。
+**第二步**，是让子类的原型指向父类的原型，这样子类就可以继承父类原型。
 
+```javascript
 Sub.prototype = Object.create(Super.prototype);
 Sub.prototype.constructor = Sub;
 Sub.prototype.method = '...';
-上面代码中，Sub.prototype是子类的原型，要将它赋值为Object.create(Super.prototype)，而不是直接等于Super.prototype。否则后面两行对Sub.prototype的操作，会连父类的原型Super.prototype一起修改掉。
+```
+上面代码中，Sub.prototype是子类的原型，要将它赋值为Object.create(Super.prototype)，而不是直接等于Super.prototype。**否则后面两行对Sub.prototype的操作，会连父类的原型Super.prototype一起修改掉。**
 
 另外一种写法是Sub.prototype等于一个父类实例。
-
+```javascript
 Sub.prototype = new Super();
+```
 上面这种写法也有继承的效果，但是子类会具有父类实例的方法。有时，这可能不是我们需要的，所以不推荐使用这种写法。
 
 举例来说，下面是一个Shape构造函数。
-
+```javascript
 function Shape() {
   this.x = 0;
   this.y = 0;
@@ -1126,8 +1142,9 @@ Shape.prototype.move = function (x, y) {
   this.y += y;
   console.info('Shape moved.');
 };
+```
 我们需要让Rectangle构造函数继承Shape。
-
+```javascript
 // 第一步，子类继承父类的实例
 function Rectangle() {
   Shape.call(this); // 调用父类构造函数
@@ -1141,23 +1158,30 @@ function Rectangle() {
 // 第二步，子类继承父类的原型
 Rectangle.prototype = Object.create(Shape.prototype);
 Rectangle.prototype.constructor = Rectangle;
+```
 采用这样的写法以后，instanceof运算符会对子类和父类的构造函数，都返回true。
 
+```javascript
 var rect = new Rectangle();
 
 rect instanceof Rectangle  // true
 rect instanceof Shape  // true
+```
 上面代码中，子类是整体继承父类。有时只需要单个方法的继承，这时可以采用下面的写法。
 
+```javascript
 ClassB.prototype.print = function() {
   ClassA.prototype.print.call(this);
   // some code
 }
+```
 上面代码中，子类B的print方法先调用父类A的print方法，再部署自己的代码。这就等于继承了父类A的print方法。
 
-多重继承
+### 多重继承
+
 JavaScript 不提供多重继承功能，即不允许一个对象同时继承多个对象。但是，可以通过变通方法，实现这个功能。
 
+```javascript
 function M1() {
   this.hello = 'hello';
 }
@@ -1182,20 +1206,19 @@ S.prototype.constructor = S;
 var s = new S();
 s.hello // 'hello'
 s.world // 'world'
-上面代码中，子类S同时继承了父类M1和M2。这种模式又称为 Mixin（混入）。
+```
+上面代码中，子类S同时继承了父类M1和M2。这种模式又称为 **Mixin（混入）**。
 
-模块
-随着网站逐渐变成“互联网应用程序”，嵌入网页的 JavaScript 代码越来越庞大，越来越复杂。网页越来越像桌面程序，需要一个团队分工协作、进度管理、单元测试等等……开发者必须使用软件工程的方法，管理网页的业务逻辑。
+### 模块
 
-JavaScript 模块化编程，已经成为一个迫切的需求。理想情况下，开发者只需要实现核心的业务逻辑，其他都可以加载别人已经写好的模块。
+下面介绍传统的做法，如何利用对象实现模块的效果。
 
-但是，JavaScript 不是一种模块化编程语言，ES6 才开始支持“类”和“模块”。下面介绍传统的做法，如何利用对象实现模块的效果。
+#### 基本的实现方法
 
-基本的实现方法
 模块是实现特定功能的一组属性和方法的封装。
 
 简单的做法是把模块写成一个对象，所有的模块成员都放到这个对象里面。
-
+```javascript
 var module1 = new Object({
 　_count : 0,
 　m1 : function (){
@@ -1205,15 +1228,23 @@ var module1 = new Object({
   　//...
 　}
 });
+```
 上面的函数m1和m2，都封装在module1对象里。使用的时候，就是调用这个对象的属性。
 
+```javascript
 module1.m1();
+```
+
 但是，这样的写法会暴露所有模块成员，内部状态可以被外部改写。比如，外部代码可以直接改变内部计数器的值。
 
+```javascript
 module1._count = 5;
-封装私有变量：构造函数的写法
+```
+#### 封装私有变量：构造函数的写法
+
 我们可以利用构造函数，封装私有变量。
 
+```javascript
 function StringBuilder() {
   var buffer = [];
 
@@ -1226,6 +1257,7 @@ function StringBuilder() {
   };
 
 }
+```
 上面代码中，buffer是模块的私有变量。一旦生成实例对象，外部是无法直接访问buffer的。但是，这种方法将私有变量封装在构造函数中，导致构造函数与实例对象是一体的，总是存在于内存之中，无法在使用完成后清除。这意味着，构造函数有双重作用，既用来塑造实例对象，又用来保存实例对象的数据，违背了构造函数与实例对象在数据上相分离的原则（即实例对象的数据，不应该保存在实例对象以外）。同时，非常耗费内存。
 
 function StringBuilder() {
