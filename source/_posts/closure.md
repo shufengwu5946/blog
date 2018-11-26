@@ -97,8 +97,205 @@ start是函数createIncrementor的内部变量。通过闭包clo，start的状�
 
 闭包clo通过createIncrementor返回，并赋给全局变量inc，这使得inc始终存在于内存中，即闭包clo一直存在于内存中，闭包的存在依赖于函数createIncrementor，表明createIncrementor一直存在于内存中，createIncrementor的的变量就一直存在于内存中，不会在调用结束后，被垃圾回收机制（garbage collection）回收。
 
-## 闭包使用易错点
 
+
+
+
+## 使用场景
+
+### 1、封装对象的私有属性和私有方法。
+```javascript
+var makeCounter = function() {
+  var privateCounter = 0;
+  function changeBy(val) {
+    privateCounter += val;
+  }
+  return {
+    increment: function() {
+      changeBy(1);
+    },
+    decrement: function() {
+      changeBy(-1);
+    },
+    value: function() {
+      return privateCounter;
+    }
+  }  
+};
+
+var Counter1 = makeCounter();
+var Counter2 = makeCounter();
+console.log(Counter1.value()); /* logs 0 */
+Counter1.increment();
+Counter1.increment();
+console.log(Counter1.value()); /* logs 2 */
+Counter1.decrement();
+console.log(Counter1.value()); /* logs 1 */
+console.log(Counter2.value()); /* logs 0 */
+```
+### 2、函数柯里化
+
+### 3、setTimeout参数传递
+
+一段代码想通过setTimeout来调用，那么它需要传递一个函数对象的引用来作为第一个参数。延迟的毫秒数作为第二个参数，但这个函数对象的引用无法为将要被延迟执行的对象提供参数。
+
+```javascript
+function callLater(paramA, paramB, paramC) {
+    return (function () {
+        paramA[paramB] = paramC;
+    });
+}
+
+var funcRef = callLater(elStyle, "display", "none");
+hideMenu = setTimeout(funcRef, 500);
+```
+
+### 4、封装相关功能集
+
+```javascript
+
+var getImgInPositionedDivHtml = (function () {
+    
+    var buffAr = [
+            '<div id="',
+        '',   //index 1, DIV ID attribute
+        '" style="position:absolute;top:',
+        '',   //index 3, DIV top position
+        'px;left:',
+        '',   //index 5, DIV left position
+        'px;width:',
+        '',   //index 7, DIV width
+        'px;height:',
+        '',   //index 9, DIV height
+        'px;overflow:hidden;\"><img src=\"',
+        '',   //index 11, IMG URL
+        '\" width=\"',
+        '',   //index 13, IMG width
+        '\" height=\"',
+        '',   //index 15, IMG height
+        '\" alt=\"',
+        '',   //index 17, IMG alt text
+        '\"><\/div>'
+    ];
+
+    
+    return (function (url, id, width, height, top, left, altText) {
+        
+        buffAr[1] = id;
+        buffAr[3] = top;
+        buffAr[5] = left;
+        buffAr[13] = (buffAr[7] = width);
+        buffAr[15] = (buffAr[9] = height);
+        buffAr[11] = url;
+        buffAr[17] = altText;
+
+        return buffAr.join('');
+    });
+})();
+```
+### 5、防抖与节流
+
+#### 防抖（Debounce）
+
+防抖，指的是无论某个动作被连续触发多少次，直到这个连续动作停止后，才会被当作一次来执行
+
+比如一个输入框接受用户不断输入，输入结束后才开始搜索
+
+例：以页面滚动作为例子，可以定义一个防抖函数，接受一个自定义的 delay值，作为判断停止的时间标识
+
+```javascript
+// 函数防抖，频繁操作中不处理，直到操作完成之后（再过 delay 的时间）才一次性处理
+function debounce(fn, delay) {
+    delay = delay || 200;
+    
+    var timer = null;
+
+    return function() {
+        var arg = arguments;
+          
+        // 每次操作时，清除上次的定时器
+        clearTimeout(timer);
+        timer = null;
+        
+        // 定义新的定时器，一段时间后进行操作
+        timer = setTimeout(function() {
+            fn.apply(this, arg);
+        }, delay);
+    }
+};
+
+var count = 0;
+
+window.onscroll = debounce(function(e) {
+    console.log(e.type, ++count); // scroll
+}, 500);
+```
+
+
+滚动页面，可以看到只有在滚动结束后才执行
+
+#### 节流（Throttle）
+
+节流，指的是无论某个动作被连续触发多少次，在定义的一段时间之内，它仅能够触发一次
+
+比如resize和scroll时间频繁触发的操作，如果都接受了处理，可能会影响性能，需要进行节流控制
+
+以页面滚动作为例子，可以定义一个节流函数，接受一个自定义的 delay值，作为判断停止的时间标识
+
+需要注意的两点
+
+要设置一个初始的标识，防止一开始处理就被执行了，同时在最后一次处理之后，也需要重新置位
+
+也要设置定时器处理，防止两次动作未到delay值，最后一组动作触发不了
+
+```javascript
+// 函数节流，频繁操作中间隔 delay 的时间才处理一次
+function throttle(fn, delay) {
+    delay = delay || 200;
+    
+    var timer = null;
+    // 每次滚动初始的标识
+    var timestamp = 0;
+
+    return function() {
+        var arg = arguments;
+        var now = Date.now();
+        
+        // 设置开始时间
+        if (timestamp === 0) {
+            timestamp = now;
+        }
+        
+        clearTimeout(timer);
+        timer = null;
+        
+        // 已经到了delay的一段时间，进行处理
+        if (now - timestamp >= delay) {
+            fn.apply(this, arg);
+            timestamp = now;
+        }
+        // 添加定时器，确保最后一次的操作也能处理
+        else {
+            timer = setTimeout(function() {
+                fn.apply(this, arg);
+                // 恢复标识
+                timestamp = 0;
+            }, delay);
+        }
+    }
+};
+
+var count = 0;
+
+window.onscroll = throttle(function(e) {
+    console.log(e.type, ++count); // scroll
+}, 500);
+```
+
+
+
+
+## 闭包需要注意的问题
 ### 1、在循环中创建闭包
 
 ```javascript
@@ -120,7 +317,8 @@ o[4](); // 5
 ```
 
 #### 解决方案
-1、使用更多闭包
+
+（1）使用更多闭包
 
 ```javascript
 function makeFunction(value){
@@ -155,7 +353,8 @@ function outer() {
 }
 ```
 
-2、循环中变量用let声明代替var声明：
+（2）循环中变量用let声明代替var声明：
+
 ```javascript
 function outer(){
     var funcs = [];
@@ -167,31 +366,8 @@ function outer(){
     return funcs;
 }
 ```
-
-## 使用场景
-
-1、封装对象的私有属性和私有方法。
-```javascript
-function Person(name) {
-  var _age;
-  function setAge(n) {
-    _age = n;
-  }
-  function getAge() {
-    return _age;
-  }
-
-  return {
-    name: name,
-    getAge: getAge,
-    setAge: setAge
-  };
-}
-
-var p1 = Person('张三');
-p1.setAge(25);
-p1.getAge() // 25
-```
+### 2、关于this对象
+### 3、内存泄露
 
 
 
@@ -226,5 +402,7 @@ https://www.cnblogs.com/likeFlyingFish/p/6426892.html
 https://blog.csdn.net/qq_38070608/article/details/78903596
 
 https://www.cnblogs.com/renlong0602/p/4398883.html
+
+https://blog.csdn.net/qq_42564846/article/details/81448352
 
 
