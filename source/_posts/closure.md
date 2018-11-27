@@ -76,7 +76,7 @@ result(); // 999
 
 ## 闭包特点
 
-一个是可以读取函数内部的变量，另一个就是让这些变量始终保持在内存中，即闭包可以使得它诞生环境一直存在。
+一个是可以读取函数内部的变量，另一个就是让这些变量始终保持在内存中，即闭包可以使得它诞生环境一直存在。此外，闭包可以避免全局变量的污染。
 
 ```javascript
 function createIncrementor(start) {
@@ -98,30 +98,32 @@ start是函数createIncrementor的内部变量。通过闭包clo，start的状�
 
 闭包clo通过createIncrementor返回，并赋给全局变量inc，这使得inc始终存在于内存中，即闭包clo一直存在于内存中，闭包的存在依赖于函数createIncrementor，表明createIncrementor一直存在于内存中，createIncrementor的的变量就一直存在于内存中，不会在调用结束后，被垃圾回收机制（garbage collection）回收。
 
-
-
-
-
 ## 使用场景
 
 ### 1、封装对象的私有属性和私有方法。
+
 ```javascript
 var makeCounter = function() {
-  var privateCounter = 0;
-  function changeBy(val) {
-    privateCounter += val;
-  }
-  return {
-    increment: function() {
-      changeBy(1);
-    },
-    decrement: function() {
-      changeBy(-1);
-    },
-    value: function() {
-      return privateCounter;
+
+    //私有属性，不能通过对象直接访问
+    var privateCounter = 0;
+
+    //私有方法，只能被同一个类中的其它方法所调用。
+    function changeBy(val) {
+        privateCounter += val;
     }
-  }  
+
+    return {
+        increment: function() {
+            changeBy(1);
+        },
+        decrement: function() {
+            changeBy(-1);
+        },
+        value: function() {
+            return privateCounter;
+        }
+    }  
 };
 
 var Counter1 = makeCounter();
@@ -135,6 +137,29 @@ console.log(Counter1.value()); /* logs 1 */
 console.log(Counter2.value()); /* logs 0 */
 ```
 ### 2、函数柯里化
+
+在计算机科学中，柯里化是把接受多个参数的函数变换成接受一个单一参数(最初函数的第一个参数)的函数，并且返回接受余下的参数且返回结果的新函数的技术。
+
+柯里化就是预先将函数的某些参数传入，得到一个简单的函数，预先传入的参数被保存在闭包中。比如：
+
+```javascript
+var adder = function(num){
+  return function(y){
+     return num + y;
+  }
+}
+var inc = adder(1);
+var dec = adder(-1)
+```
+这里的inc/dec两个变量事实上是两个函数，可以通过括号来调用，比如下例中的用法：
+
+```javascript
+// inc, dec现在是两个新的函数，作用是将传入的参数值(+/-)1
+print(inc(99));//100
+print(dec(101));//100
+print(adder(100)(2));//102
+print(adder(2)(100));//102
+```
 
 ### 3、setTimeout参数传递
 
@@ -194,6 +219,7 @@ var getImgInPositionedDivHtml = (function () {
     });
 })();
 ```
+
 ### 5、防抖与节流
 
 #### 防抖（Debounce）
@@ -232,6 +258,7 @@ window.onscroll = debounce(function(e) {
 }, 500);
 ```
 
+![](closure/debounce.gif)
 
 滚动页面，可以看到只有在滚动结束后才执行
 
@@ -293,10 +320,90 @@ window.onscroll = throttle(function(e) {
 }, 500);
 ```
 
+![](closure/throttle.gif)
 
+### 6、实现单例模式
 
+```javascript
+var getSingle = function(func){
+    var ret = null;
+
+    return function(){
+        return ret || ret = func.apply(this, Array.prototype.slice.call(arguments));
+    }
+}
+
+var getScript = getSingle(function(){ 
+    return document.createElement( 'script' ); 
+}); 
+ 
+var script1 = getScript(); 
+var script2 = getScript(); 
+ 
+alert ( script1 === script2 );    // 输出：true  
+```
+
+### 7、AOP应用
+
+AOP（面向切面编程）的主要作用是把一些跟核心业务逻辑模块无关的功能抽离出来，这些
+跟业务逻辑无关的功能通常包括日志统计、安全控制、异常处理等。把这些功能抽离出来之后 。再通过“动态织入”的方式掺入业务逻辑模块中。这样做的好处首先是可以保持业务逻辑模块的纯净和高内聚性，其次是可以很方便地复用日志统计等功能模块。
+
+#### 例子：数据统计上报
+
+分离业务代码和数据统计代码,无论在什么语言中,都是AOP的经典应用之一.在项目开发的结尾阶段难免要加上很多统计数据的代码,这些过程很可能让我们被迫改动早已封装好的函数.
+
+比如页面中有一个登录button,点击这个button会弹出登录浮层,与此同时要进行数据上报,来统计有多少用户点击了这个登录button
+
+```html
+<html>
+    <button id="button" tag="login">点击打开登录浮层</button>
+    <script>
+        var showLogin = function() {
+            console.log("打开登录浮层");
+            log(this.getAttribute('tag'));
+        }
+
+        var log = function(tag) {
+            console.log("上传标签为:" + tag);
+            //(new Image).src="http://xxx.com/report?tag="+tag; //真正的上传代码略
+        }
+
+    document.getElementById('button').onclick = showLogin;
+    </script>
+</html>
+```
+
+我们看到在showLogin函数里,既要负责打开登录浮层,又要负责数据上传,这是两个层面的功能,在此处却被耦合进一个函数里.使用AOP分离之后,代码如下:
+```html
+<html>
+    <button id="button" tag="login">点击打开登录浮层</button>
+    <script>
+        Function.prototype.after = function(afterfn) {
+            var __self = this;
+            return function() {
+                var ret = __self.apply(this, arguments);
+                afterfn.apply(this, arguments);
+                return ret;
+            }
+        }
+
+        var showLogin=function(){
+            console.log("打开登录浮层");
+        }
+
+        var log=function(){
+            console.log("上传标签为:"+this.getAttribute('tag'));
+        }
+
+        showLogin=showLogin.after(log);
+
+        document.getElementById('button').onclick=showLogin;
+    </script>
+</html>
+```
 
 ## 闭包需要注意的问题
+
 ### 1、在循环中创建闭包
 
 ```javascript
@@ -368,7 +475,47 @@ function outer(){
 }
 ```
 ### 2、关于this对象
-### 3、内存泄露
+
+this对象实在运行时基于函数的执行环境绑定的。
+
+```javascript
+var name = "The Window";
+
+var object = {
+    name : "My Object",
+    getNameFunc : function(){
+        return function(){
+            return this.name;
+        };
+    }
+};
+
+alert(object.getNameFunc()());
+```
+
+**解决方法：**
+
+将this保存在一个变量中，让闭包可以访问。
+
+```javascript
+var name = "The Window";
+var object = {
+    name : "My Object",
+
+    getNameFunc : function(){
+        var that = this;
+
+        return function(){
+            return that.name;
+        };
+    }
+};
+
+alert(object.getNameFunc()());
+```
+### 3、性能问题
+
+外层函数每次运行，都会生成一个新的闭包，而这个闭包又会保留外层函数的内部变量，变量长期驻扎在内存，所以对内存产生消耗。因此不能滥用闭包，否则会造成网页的性能问题。
 
 
 
@@ -405,5 +552,7 @@ https://blog.csdn.net/qq_38070608/article/details/78903596
 https://www.cnblogs.com/renlong0602/p/4398883.html
 
 https://blog.csdn.net/qq_42564846/article/details/81448352
+
+https://www.jianshu.com/p/e7f32464a8ab
 
 
