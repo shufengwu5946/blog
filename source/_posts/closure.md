@@ -100,7 +100,7 @@ start是函数createIncrementor的内部变量。通过闭包clo，start的状�
 
 ## 使用场景
 
-### 1、封装对象的私有属性和私有方法。
+### 1、模拟对象的私有属性和私有方法。
 
 ```javascript
 var makeCounter = function() {
@@ -220,7 +220,7 @@ var getImgInPositionedDivHtml = (function () {
 })();
 ```
 
-### 5、防抖与节流
+### 5、防抖、节流与分时
 
 #### 防抖（Debounce）
 
@@ -322,6 +322,48 @@ window.onscroll = throttle(function(e) {
 
 ![](closure/throttle.gif)
 
+#### 分时函数
+
+一个例子是创建 WebQQ的 QQ好友列表。列表中通常会有成百上千个好友，如果一个好友用一个节点来表示，当我们在页面中渲染这个列表的时候，可能要一次性往页面中创建成百上千个节点。在短时间内往页面中大量添加 DOM节点显然也会让浏览器吃不消，我们看到的结果往往就是浏览器的卡顿甚至假死 。
+
+这时候就需要分时函数，每隔一段时间运行一段，比如没200ms加载10个QQ好友。
+
+```javascript
+var timeChunk = function(argsAry, fn, count) {
+    var interval;
+    var exec = function() {
+        var l = argsAry.length;
+        for (var i = 0; i < Math.min(count || 1, l); i++) {
+            var arg = argsAry.shift();
+            fn(arg);
+        }
+    }
+
+    return function() {
+        interval = setInterval(function() {
+            var flag = exec();
+            if (argsAry.length === 0) {
+                clearInterval(interval);
+                interval = null;
+            }
+        }, 500)
+    }
+};
+
+var a = [],func;
+
+// 模拟QQ好友列表
+for (var i = 0; i < 36; i++) {
+    a.push(i);
+}
+
+//
+func = timeChunk(a, function(i) {
+    console.log(i);
+}, 200)
+func();
+```
+
 ### 6、实现单例模式
 
 ```javascript
@@ -401,6 +443,78 @@ AOP（面向切面编程）的主要作用是把一些跟核心业务逻辑模�
     </script>
 </html>
 ```
+
+### 8、模拟块级作用域
+
+ES5没有块级作用域的概念。这意味着在块语句中定义的变量，实际上是包含在函数中而非语句中创建的。因此从函数内的所有变量定义开始，就可以在函数内部随处访问它。
+
+```javascript
+function outputNumbers(count){
+    for(var i = 0; i < count; i++){
+        console.log(i); // 0, 1, ... count - 1
+    }
+    console.log(i); // count
+}
+```
+函数包装器可以用来模仿块作用域并避免这个问题。 
+
+函数包装器的作用：
+
+立即执行函数中的代码，又不会再内存中留下对该函数的引用；
+函数内部的所有变量都会被立即销毁(除非将这些变量赋值给了包含作用域中的变量)。
+
+当在函数内部使用函数包装器的时候，此时函数包装器就是一个闭包，有权访问外部环境中的所有变量。
+
+```javascript
+function outputNumbers(count){
+    (function(){
+        //块级作用域
+        for(var i = 0; i < count; i++){
+            console.log(i); // 0, 1, ... count - 1
+        }
+    })();
+    console.log(i); // error
+}
+```
+
+### 9、通过对象实例方法关联函数
+
+```javascript
+function associateObjWithEvent(obj, methodName) {
+    return (function (e) {
+        e = e || window.event;
+        return obj[methodName](e, this);
+    });
+}
+
+function DhtmlObject(elementId) {
+    var el = document.getElementById(elementId);
+    if (el) {
+        el.onclick = associateObjWithEvent(this, "doOnClick");
+        el.onmouseover = associateObjWithEvent(this, "doMouseOver");
+        el.onmouseout = associateObjWithEvent(this, "doMouseOut");
+    }
+}
+DhtmlObject.prototype.doOnClick = function (event, element) {
+    if (element.id === 'test') {
+        console.log('test');
+    } else {
+        console.log('doOnClick: ' + event + ' ' + element);
+    }
+}
+DhtmlObject.prototype.doMouseOver = function (event, element){
+    console.log('doMouseOver: ' + event + ' ' + element);
+}
+DhtmlObject.prototype.doMouseOut = function (event, element) {
+    console.log('doMouseOut: ' + event + ' ' + element);
+}
+
+document.addEventListener("DOMContentLoaded", function (event) {
+    new DhtmlObject('test');
+})
+```
+### 9、一些其他设计模式
+
 
 ## 闭包需要注意的问题
 
@@ -519,6 +633,8 @@ alert(object.getNameFunc()());
 
 
 
+
+
 ## 参考文献
 
 《闭包的特征和应用场景》
@@ -554,5 +670,7 @@ https://www.cnblogs.com/renlong0602/p/4398883.html
 https://blog.csdn.net/qq_42564846/article/details/81448352
 
 https://www.jianshu.com/p/e7f32464a8ab
+
+http://demo.jb51.net/js/javascript_bibao/index.htm#clOtE
 
 
