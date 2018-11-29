@@ -161,21 +161,6 @@ print(adder(100)(2));//102
 print(adder(2)(100));//102
 ```
 
-### 3、setTimeout参数传递
-
-一段代码想通过setTimeout来调用，那么它需要传递一个函数对象的引用来作为第一个参数。延迟的毫秒数作为第二个参数，但这个函数对象的引用无法为将要被延迟执行的对象提供参数。
-
-```javascript
-function callLater(paramA, paramB, paramC) {
-    return (function () {
-        paramA[paramB] = paramC;
-    });
-}
-
-var funcRef = callLater(elStyle, "display", "none");
-hideMenu = setTimeout(funcRef, 500);
-```
-
 ### 4、封装相关功能集
 
 ```javascript
@@ -387,8 +372,7 @@ alert ( script1 === script2 );    // 输出：true
 
 ### 7、AOP应用
 
-AOP（面向切面编程）的主要作用是把一些跟核心业务逻辑模块无关的功能抽离出来，这些
-跟业务逻辑无关的功能通常包括日志统计、安全控制、异常处理等。把这些功能抽离出来之后 。再通过“动态织入”的方式掺入业务逻辑模块中。这样做的好处首先是可以保持业务逻辑模块的纯净和高内聚性，其次是可以很方便地复用日志统计等功能模块。
+AOP（面向切面编程）的主要作用是把一些跟核心业务逻辑模块无关的功能抽离出来，这些跟业务逻辑无关的功能通常包括日志统计、安全控制、异常处理等。把这些功能抽离出来之后 。再通过“动态织入”的方式掺入业务逻辑模块中。这样做的好处首先是可以保持业务逻辑模块的纯净和高内聚性，其次是可以很方便地复用日志统计等功能模块。
 
 #### 例子：数据统计上报
 
@@ -613,12 +597,11 @@ alert(object.getNameFunc()());
 
 ```javascript
 var name = "The Window";
+
 var object = {
     name : "My Object",
-
     getNameFunc : function(){
         var that = this;
-
         return function(){
             return that.name;
         };
